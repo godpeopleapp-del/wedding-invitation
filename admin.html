@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"/>
+<title>관리자 페이지 — 김지훈 ♥ 이수아</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Serif KR', serif; background: #FDFAF6; color: #3D3530; min-height: 100vh; }
+  button { cursor: pointer; font-family: inherit; border: none; background: none; }
+  input { font-family: inherit; }
+
+  /* 로그인 화면 */
+  .login-wrap { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 24px; }
+  .login-label { font-size: 11px; letter-spacing: 0.25em; color: #C9A98A; margin-bottom: 12px; text-align: center; }
+  .login-title { font-size: 22px; font-weight: 300; color: #3D3530; text-align: center; }
+  .login-divider { width: 32px; height: 1px; background: #C9A98A; margin: 12px auto 40px; }
+  .login-form { width: 100%; max-width: 280px; }
+  .login-input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #E8DDD5; background: white; color: #3D3530; font-size: 14px; text-align: center; letter-spacing: 0.3em; outline: none; transition: border-color 0.2s; }
+  .login-input:focus { border-color: #C9A98A; }
+  .login-input.error { border-color: #D4756A; }
+  .login-error { font-size: 12px; color: #D4756A; text-align: center; margin-top: 8px; }
+  .login-btn { width: 100%; padding: 14px; border-radius: 999px; background: #C9A98A; color: white; font-size: 13px; letter-spacing: 0.1em; margin-top: 16px; transition: opacity 0.2s, transform 0.15s; }
+  .login-btn:active { transform: scale(0.97); }
+  .back-link { margin-top: 32px; font-size: 12px; color: #C9A98A; letter-spacing: 0.1em; background: none; border: none; cursor: pointer; transition: opacity 0.2s; }
+  .back-link:hover { opacity: 0.6; }
+
+  /* 대시보드 */
+  .header { position: sticky; top: 0; z-index: 10; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; background: rgba(253,250,246,0.95); border-bottom: 1px solid #E8DDD5; backdrop-filter: blur(8px); }
+  .header-sub { font-size: 11px; letter-spacing: 0.2em; color: #C9A98A; margin-bottom: 2px; }
+  .header-title { font-size: 15px; font-weight: 400; color: #3D3530; }
+  .header-back { font-size: 12px; padding: 8px 16px; border-radius: 999px; border: 1px solid #E8DDD5; color: #8C7B70; transition: opacity 0.2s; }
+  .header-back:hover { opacity: 0.7; }
+
+  .content { padding: 32px 24px; max-width: 480px; margin: 0 auto; }
+
+  /* 탭 */
+  .tabs { display: flex; background: #F3EDE7; border-radius: 16px; padding: 4px; margin-bottom: 32px; }
+  .tab-btn { flex: 1; padding: 10px 4px; border-radius: 12px; font-size: 12px; color: #8C7B70; transition: all 0.2s; }
+  .tab-btn.active { background: white; color: #3D3530; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  /* 카드 */
+  .card { background: white; border: 1px solid #E8DDD5; border-radius: 24px; padding: 24px; margin-bottom: 12px; }
+  .card-sm { border-radius: 16px; padding: 16px; }
+  .stat-label { font-size: 11px; letter-spacing: 0.2em; color: #C9A98A; margin-bottom: 4px; }
+  .stat-value { font-size: 48px; font-weight: 300; color: #3D3530; }
+  .stat-desc { font-size: 13px; color: #8C7B70; margin-top: 4px; }
+  .divider-line { width: 32px; height: 1px; background: #E8DDD5; margin: 24px auto; }
+
+  /* 통계 그리드 */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+  .stat-mini { background: white; border: 1px solid #E8DDD5; border-radius: 16px; padding: 16px; text-align: center; }
+  .stat-mini-val { font-size: 24px; font-weight: 300; margin-bottom: 4px; }
+  .stat-mini-lbl { font-size: 11px; color: #8C7B70; }
+
+  /* 목록 아이템 */
+  .list-item { background: white; border: 1px solid #E8DDD5; border-radius: 16px; padding: 16px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 12px; }
+  .list-item-body { flex: 1; min-width: 0; }
+  .item-name { font-size: 14px; font-weight: 500; color: #3D3530; }
+  .item-date { font-size: 11px; color: #C9A98A; }
+  .item-msg { font-size: 13px; color: #8C7B70; font-weight: 300; line-height: 1.6; margin-top: 6px; word-break: break-word; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; display: inline-block; }
+  .badge-attend { background: #FFF5EE; color: #C9A98A; border: 1px solid #E8DDD5; }
+  .badge-absent { background: #FDF0EE; color: #D4756A; border: 1px solid #F0C8C3; }
+  .badge-side { background: #F3EDE7; color: #8C7B70; }
+  .item-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+  .delete-btn { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #FDF0EE; color: #D4756A; transition: opacity 0.2s; }
+  .delete-btn:hover { opacity: 0.7; }
+  .empty-state { text-align: center; padding: 48px 24px; font-size: 13px; color: #C9A98A; }
+
+  /* 모달 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+  .modal { background: white; border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 320px; text-align: center; }
+  .modal-title { font-size: 16px; font-weight: 400; color: #3D3530; margin-bottom: 8px; }
+  .modal-desc { font-size: 13px; color: #8C7B70; margin-bottom: 24px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-cancel { flex: 1; padding: 12px; border-radius: 999px; border: 1px solid #E8DDD5; color: #8C7B70; font-size: 13px; }
+  .modal-confirm { flex: 1; padding: 12px; border-radius: 999px; background: #D4756A; color: white; font-size: 13px; }
+  .modal-confirm:active { transform: scale(0.97); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- 로그인 화면 -->
+<div id="loginScreen" class="login-wrap">
+  <p class="login-label">ADMIN</p>
+  <h1 class="login-title">관리자 로그인</h1>
+  <div class="login-divider"></div>
+  <form class="login-form" onsubmit="handleLogin(event)">
+    <input id="pwInput" type="password" class="login-input" placeholder="비밀번호를 입력하세요" autocomplete="off"/>
+    <p id="pwError" class="login-error hidden">비밀번호가 올바르지 않습니다</p>
+    <button type="submit" class="login-btn">입장하기</button>
+  </form>
+  <button class="back-link" onclick="goBack()">← 청첩장으로 돌아가기</button>
+</div>
+
+<!-- 대시보드 -->
+<div id="dashboard" class="hidden">
+  <header class="header">
+    <div>
+      <p class="header-sub">ADMIN</p>
+      <h1 class="header-title">관리자 페이지</h1>
+    </div>
+    <button class="header-back" onclick="goBack()">← 청첩장</button>
+  </header>
+
+  <div class="content">
+    <!-- 탭 -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('visitors', this)">방문자</button>
+      <button class="tab-btn" onclick="switchTab('rsvp', this)">참석여부</button>
+      <button class="tab-btn" onclick="switchTab('guestbook', this)">방명록</button>
+    </div>
+
+    <!-- 방문자 탭 -->
+    <div id="tab-visitors">
+      <div class="card" style="text-align:center">
+        <p class="stat-label">TOTAL VISITORS</p>
+        <p class="stat-value" id="visitorCount">0</p>
+        <p class="stat-desc">명이 청첩장을 열어보았습니다</p>
+        <div class="divider-line"></div>
+        <p style="font-size:11px;color:#C9A98A" id="todayDate"></p>
+      </div>
+      <div class="card card-sm" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <p class="stat-label">GUEST BOOK</p>
+          <p style="font-size:15px;color:#3D3530">방명록 메시지</p>
+        </div>
+        <div style="text-align:right">
+          <p style="font-size:28px;font-weight:300;color:#C9A98A" id="msgCount">0</p>
+          <p style="font-size:11px;color:#8C7B70">건</p>
+        </div>
+      </div>
+      <div class="card card-sm" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <p class="stat-label">WEDDING DAY</p>
+          <p style="font-size:15px;color:#3D3530">2026년 9월 12일</p>
+        </div>
+        <div style="text-align:right">
+          <p style="font-size:28px;font-weight:300;color:#C9A98A" id="dday"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 참석여부 탭 -->
+    <div id="tab-rsvp" class="hidden">
+      <div class="stat-grid">
+        <div class="stat-mini"><p class="stat-mini-val" id="attendCount" style="color:#C9A98A">0</p><p class="stat-mini-lbl">참석</p></div>
+        <div class="stat-mini"><p class="stat-mini-val" id="absentCount" style="color:#D4756A">0</p><p class="stat-mini-lbl">불참석</p></div>
+        <div class="stat-mini"><p class="stat-mini-val" id="totalGuests" style="color:#8C7B70">0</p><p class="stat-mini-lbl">총 인원</p></div>
+      </div>
+      <div id="rsvpList"></div>
+    </div>
+
+    <!-- 방명록 탭 -->
+    <div id="tab-guestbook" class="hidden">
+      <div id="guestbookList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div id="deleteModal" class="modal-overlay hidden">
+  <div class="modal">
+    <p class="modal-title">삭제하시겠습니까?</p>
+    <p class="modal-desc">삭제된 내용은 복구할 수 없습니다.</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-confirm" onclick="confirmDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PW = "1111";
+let deleteTarget = null; // { type: 'rsvp'|'guestbook', id }
+
+// localStorage에서 데이터 읽기 (청첩장과 동일한 키 사용)
+function getData(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+  catch { return fallback; }
+}
+function saveData(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const pw = document.getElementById("pwInput").value;
+  if (pw === ADMIN_PW) {
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+    renderAll();
+  } else {
+    document.getElementById("pwInput").classList.add("error");
+    document.getElementById("pwError").classList.remove("hidden");
+    document.getElementById("pwInput").value = "";
+  }
+}
+
+function goBack() {
+  // index.html로 이동
+  window.location.href = "index.html";
+}
+
+function switchTab(tab, btn) {
+  ["visitors","rsvp","guestbook"].forEach(t => {
+    document.getElementById("tab-"+t).classList.add("hidden");
+  });
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-"+tab).classList.remove("hidden");
+  btn.classList.add("active");
+  renderAll();
+}
+
+function renderAll() {
+  const visitors = getData("wedding_visitors", 0);
+  const messages = getData("wedding_messages", []);
+  const rsvpList = getData("wedding_rsvp", []);
+
+  // 방문자
+  document.getElementById("visitorCount").textContent = visitors.toLocaleString();
+  document.getElementById("msgCount").textContent = messages.length;
+  document.getElementById("todayDate").textContent =
+    new Date().toLocaleDateString("ko-KR", { year:"numeric", month:"long", day:"numeric" }) + " 기준";
+  const ddays = Math.max(0, Math.ceil((new Date("2026-09-12") - Date.now()) / 86400000));
+  document.getElementById("dday").textContent = "D-" + ddays;
+
+  // 참석여부 통계
+  const attending = rsvpList.filter(r => r.attending === "참석");
+  const absent = rsvpList.filter(r => r.attending === "불참석");
+  const total = attending.reduce((s, r) => s + 1 + parseInt(r.guests || "0", 10), 0);
+  document.getElementById("attendCount").textContent = attending.length;
+  document.getElementById("absentCount").textContent = absent.length;
+  document.getElementById("totalGuests").textContent = total;
+
+  // 참석여부 목록
+  const rsvpEl = document.getElementById("rsvpList");
+  if (rsvpList.length === 0) {
+    rsvpEl.innerHTML = '<div class="empty-state">아직 참석 여부가 없습니다</div>';
+  } else {
+    rsvpEl.innerHTML = rsvpList.map(r => `
+      <div class="list-item">
+        <div class="list-item-body">
+          <div class="item-meta">
+            <span class="item-name">${escHtml(r.name)}</span>
+            <span class="badge ${r.attending === "참석" ? "badge-attend" : "badge-absent"}">${escHtml(r.attending)}</span>
+            <span class="badge badge-side">${escHtml(r.side || "")}</span>
+            <span class="item-date">${escHtml(r.date || "")}</span>
+          </div>
+          <p style="font-size:12px;color:#8C7B70">${r.guests === "0" ? "본인만" : "본인 외 " + r.guests + "명"}</p>
+          ${r.message ? `<p class="item-msg">${escHtml(r.message)}</p>` : ""}
+        </div>
+        <button class="delete-btn" onclick="openModal('rsvp', ${r.id})" title="삭제">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>`).join("");
+  }
+
+  // 방명록 목록
+  const gbEl = document.getElementById("guestbookList");
+  if (messages.length === 0) {
+    gbEl.innerHTML = '<div class="empty-state">등록된 방명록이 없습니다</div>';
+  } else {
+    gbEl.innerHTML = messages.map(m => `
+      <div class="list-item">
+        <div class="list-item-body">
+          <div class="item-meta">
+            <span class="item-name">${escHtml(m.name)}</span>
+            ${m.side ? `<span class="badge badge-side">${escHtml(m.side)}</span>` : ""}
+            <span class="item-date">${escHtml(m.date || "")}</span>
+          </div>
+          <p class="item-msg">${escHtml(m.message)}</p>
+        </div>
+        <button class="delete-btn" onclick="openModal('guestbook', ${m.id})" title="삭제">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>`).join("");
+  }
+}
+
+function escHtml(str) {
+  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function openModal(type, id) {
+  deleteTarget = { type, id };
+  document.getElementById("deleteModal").classList.remove("hidden");
+}
+function closeModal() {
+  deleteTarget = null;
+  document.getElementById("deleteModal").classList.add("hidden");
+}
+function confirmDelete() {
+  if (!deleteTarget) return;
+  const key = deleteTarget.type === "rsvp" ? "wedding_rsvp" : "wedding_messages";
+  const list = getData(key, []);
+  saveData(key, list.filter(item => item.id !== deleteTarget.id));
+  closeModal();
+  renderAll();
+}
+</script>
+</body>
+</html>
